@@ -16,7 +16,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use("/api/v1/", taskRoute);
+app.use("/", taskRoute);
 
 app.use("/", (req, res) => {
   res.send("Test Server Is Running")
