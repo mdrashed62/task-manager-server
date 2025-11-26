@@ -33,9 +33,12 @@ export const register = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };
-
 
 export const login = async (req, res) => {
   try {
@@ -79,13 +82,15 @@ export const login = async (req, res) => {
       .status(200)
       .cookie("token", token, {
         httpOnly: true,
-        sameSite: "strict",
+        secure: true,
+        sameSite: "none",
         maxAge: 24 * 60 * 60 * 1000,
       })
       .json({
         success: true,
         message: `Welcome back ${user.fullName}`,
         user: userWithoutPassword,
+        token: token,
       });
   } catch (error) {
     console.log(error);
@@ -99,10 +104,18 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    return res.status(200).cookie("token", "", { maxAge: 0 }).json({
-      success: true,
-      message: "User logout succesfully.",
-    });
+    return res
+      .status(200)
+      .cookie("token", "", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 0,
+      })
+      .json({
+        success: true,
+        message: "User logout succesfully.",
+      });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -114,7 +127,7 @@ export const logout = async (req, res) => {
 
 export const getMyProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.id).select("-password");
+    const user = await User.findById(req.userId).select("-password");
     return res.status(200).json({
       success: true,
       user,
